@@ -1,0 +1,29 @@
+{
+  "name": "rickmorty",
+  "version": "1.0.0",
+  "description": "React for Rick&Morty",
+  "scripts": {
+    "start": "webpack-dev-server --content-base build/",
+    "build": "cross-env NODE_ENV=production webpack --progress"
+  },
+  "dependencies": {
+    "react": "15.2.0",
+    "react-addons": "^0.9.1-deprecated",
+    "react-dom": "15.2.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "6.9.0",
+    "babel-preset-react": "6.11.1",
+    "babel-preset-stage-0": "6.5.0",
+    "cross-env": "^1.0.6",
+    "css-loader": "^2.1.1",
+    "html-webpack-plugin": "2.21.0",
+    "style-loader": "^0.23.1",
+    "webpack": "1.13.1",
+    "webpack-dev-server": "1.14.1"
+  },
+  "author": "Srivatsan",
+  "license": "ISC"
+}
