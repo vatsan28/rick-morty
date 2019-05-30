@@ -3,15 +3,12 @@ import Question from "./question";
 
 class QuestionMenu extends Component {
     render() {
+        const questions = this.props.questions;
+        
         return (
             <div>
-                <div className = "twelve columns">
-                    <div className="three columns">
-                        <Question questionText="1" />
-                        <Question questionText="2" />
-                        <Question questionText="3" />
-                        <Question questionText="4" />
-                    </div>
+                <div className = "twelve columns menu">
+                    {questions.map((question, i) => <Question key={i} questionText={question} />) }
                 </div>
             </div>
         )

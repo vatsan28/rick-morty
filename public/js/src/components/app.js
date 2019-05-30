@@ -1,15 +1,27 @@
 import React, { Component } from "react";
 import Header from "./header";
 import QuestionMenu from "./questionMenu";
-import Answer from "./answer";
+import CharacterList from "./characterList";
+import NoCharacters from "./noCharacters";
 
 class App extends Component {
+    state = {
+        questions: [
+            "BROWSE CHARACTERS",
+            "BROWSE CHARACTER BY LOCATION", 
+            "BROWSE CHRACTER BY EPISODE", 
+            "BROWSE CHARACTER BY DIMENSION"
+        ],
+        characters: {}
+    }
+
     render () {
+        const isCharacterAvailable = this.state.characters.length >= 1;
         return (
             <div>
                 <Header />
-                <QuestionMenu />
-                <Answer />
+                <QuestionMenu questions={this.state.questions} />
+                { isCharacterAvailable ? <CharacterList /> : <NoCharacters /> }
             </div>
         )
     }

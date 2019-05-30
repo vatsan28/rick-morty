@@ -4,7 +4,8 @@
   "description": "React for Rick&Morty",
   "scripts": {
     "start": "webpack-dev-server --content-base build/",
-    "build": "cross-env NODE_ENV=production webpack --progress"
+    "build": "cross-env NODE_ENV=production webpack --progress",
+    "watch": "node scripts/watch.js"
   },
   "dependencies": {
     "react": "15.2.0",

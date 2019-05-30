@@ -1,9 +1,13 @@
 import React from 'react';
 
-const Question = props => (
-    <div className="three columns">
-        { props.questionText }
-    </div>
-)
+class Question extends React.Component {
+    render() {
+        return (
+            <div className="three columns me">
+                { this.props.questionText }
+            </div>
+        )
+    }
+}
     
 export default Question;
