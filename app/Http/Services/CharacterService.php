@@ -8,12 +8,12 @@ use GuzzleHttp\Promise\Promise;
 
 class CharacterService
 {
-    public function getCharacters() {
-        
+    public function getCharacters($page) {
+        // print_r($page);
         $getCharacterDetails = new Promise(
-            function() use (&$getCharacterDetails) {
+            function() use (&$getCharacterDetails, $page) {
                 $client = new Client();
-                $response = $client->get("https://rickandmortyapi.com/api/character");
+                $response = $client->get("https://rickandmortyapi.com/api/character/?page={$page}");
                 $data = json_decode($response->getBody());
                 $getCharacterDetails->resolve($data);
             }
