@@ -1,5 +1,6 @@
 <?php
 
+use React\Promise\Deferred;
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -12,3 +13,4 @@
 */
 
 $router->get('/', 'Controller@index');
+$router->get('/characters', 'CharacterController@getCharacters');
