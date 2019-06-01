@@ -14,3 +14,4 @@ use React\Promise\Deferred;
 
 $router->get('/', 'Controller@index');
 $router->get('/character/', 'CharacterController@getCharacters');
+$router->get('/character/{id}', 'CharacterController@getCharacterById');
