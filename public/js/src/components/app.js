@@ -1,23 +1,34 @@
 import React, { Component } from "react";
 import Header from "./Header";
 import QuestionMenu from "./QuestionMenu";
-import CharacterList from "./CharacterList";
-import LocationList from "./LocationList";
-import NoCharacters from "./NoCharacters";
-import Pagination from "./Pagination";
-import CharacterFilter from "./CharacterFilter";
+
+import CharacterList from "./character/CharacterList";
+import LocationList from "./location/LocationList";
+import EpisodeList from "./episode/EpisodeList";
+
+import NoCharacters from "./character/NoCharacters";
+
+import CharacterPagination from "./character/CharacterPagination";
+import EpisodePagination from "./episode/EpisodePagination";
+import LocationPagination from "./location/LocationPagination";
+
+import CharacterFilter from "./character/CharacterFilter";
+import LocationFilter from "./location/LocationFilter";
+import EpisodeFilter from "./episode/EpisodeFilter";
+
 import { getNextPage } from "../helpers/Api";
 
 class App extends Component {
     state = {
         characters: [],
         locations: [],
+        episodes: [],
         pageInfo: {}
     }
 
     prepareCharacterPageInfo = (pageInfo, resource) => {
-        const nextPage = this.parseNextPage(pageInfo["next"]);
-        const prevPage = nextPage == 0 ? 0 : nextPage - 2;
+        const nextPage = this.parsePageUrl(pageInfo["next"]);
+        const prevPage = this.parsePageUrl(pageInfo["prev"]);;
         const res = {
             characters: {
                 totalPages: pageInfo.pages,
@@ -26,38 +37,61 @@ class App extends Component {
                 filterName: ""
             },
             locations: {},
+            episodes: {},
             currentApiResource: resource
         }
         return (res);
     }
 
     prepareNonCharacterPageInfo = (pageInfo, resource) => {
-        const nextPage = this.parseNextPage(pageInfo["next"]);
-        const prevPage = nextPage == 0 ? 0 : nextPage - 2;
-        const res = {
-            characters: {},
-            locations: {
-                totalPages: pageInfo.pages,
-                nextPage,
-                prevPage
-            },
-            currentApiResource: resource
+        console.log(resource);
+        const nextPage = this.parsePageUrl(pageInfo["next"]);
+        const prevPage = this.parsePageUrl(pageInfo["prev"]);
+        var res;
+        if (resource === "location") {
+            res = {
+                characters: {},
+                locations: {
+                    totalPages: pageInfo.pages,
+                    nextPage,
+                    prevPage,
+                    filterName: "",
+                    filterType: "",
+                    filterDimension: ""
+                },
+                episodes: {},
+                currentApiResource: resource
+            }
+        } else if (resource === "episode") {
+            res = {
+                characters: {},
+                locations: {},
+                episodes:{
+                    totalPages: pageInfo.pages,
+                    nextPage,
+                    prevPage,
+                    filterName: "",
+                    code: ""
+                },
+                currentApiResource: resource
+            }
         }
+        console.log(res);
         return (res);
     }
 
     //To load state from the question menu.
     loadState = (state) => {
-        var {characters, locations, pageInfo} = state;
+        var {characters, locations, episodes, pageInfo} = state;
         const resource = state.pageInfo.currentApiResource;
         pageInfo = (resource == "character") 
                     ? this.prepareCharacterPageInfo(pageInfo["characters"], resource)
-                    : this.prepareNonCharacterPageInfo(pageInfo["locations"], resource) ;
+                    : this.prepareNonCharacterPageInfo(pageInfo["nonCharacter"], resource) ;
         
-        this.setState({characters, locations, pageInfo});
+        this.setState({characters, locations, episodes, pageInfo});
     }
 
-    //To load characters from a location. Add the next and prev results in the character pagination.
+    //To load characters from a location/episode.
     loadLocationCharacterGroup = (newCharacters, nextSetOfCharacters, prevSetOfCharacters, currSetOfCharacters) => {
         const characterPageInfo = {
             totalPages: null,
@@ -78,8 +112,8 @@ class App extends Component {
 
     //To load the next/previous page characters.
     loadNextSetCharacters = (newCharacters, resultInformation, currentApiResource) => {
-        const nextPage = this.parseNextPage(resultInformation["next"]);
-        const prevPage = nextPage == 0 ? 0 : nextPage - 2;
+        const nextPage = this.parsePageUrl(resultInformation["next"]);
+        const prevPage = this.parsePageUrl(resultInformation["prev"]);
         
         this.setState({
             characters: newCharacters,
@@ -95,12 +129,63 @@ class App extends Component {
             }
         });
     }
+    
+    loadNextSetLocations = (newLocations, resultInformation, currentApiResource) => {
+        const nextPage = this.parsePageUrl(resultInformation["next"]);
+        const prevPage = this.parsePageUrl(resultInformation["prev"]);
+        
+        this.setState({
+            characters: [],
+            locations: newLocations,
+            episodes: [],
+            pageInfo: {
+                locations: {
+                    totalPages: resultInformation["pages"],
+                    nextPage,
+                    prevPage,
+                    filterName: resultInformation["filterName"],
+                    filterType: resultInformation["filterType"],
+                    filterDimension: resultInformation["filterDimension"]
+                },
+                characters : {},
+                episodes: {},
+                currentApiResource
+            }
+        });
+    }
+
+    loadNextSetEpisodes = (newEpisodes, resultInformation, currentApiResource) => {
+        const nextPage = this.parsePageUrl(resultInformation["next"]);
+        const prevPage = this.parsePageUrl(resultInformation["prev"]);
+        
+        this.setState({
+            characters: [],
+            locations: [],
+            episodes: newEpisodes,
+            pageInfo: {
+                episodes: {
+                    totalPages: resultInformation["pages"],
+                    nextPage,
+                    prevPage,
+                    filterName: resultInformation["filterName"],
+                    code: resultInformation["code"],
+                },
+                characters : {},
+                locations: {},
+                currentApiResource
+            }
+        });
+    }
 
     render () {
         const isCharacterAvailable = this.state.characters.length >= 1;
         const isLocationAvailable = this.state.locations.length >= 1;
-        const characterFilter = this.state.pageInfo.currentApiResource === "character";
+        const isEpisodeAvailable = this.state.episodes.length >= 1;
         
+        const characterFilter = this.state.pageInfo.currentApiResource === "character";
+        const locationFilter = this.state.pageInfo.currentApiResource === "location";
+        const episodeFilter = this.state.pageInfo.currentApiResource === "episode";
+        console.log(this.state);
         return (
             <div>
                 <Header />
@@ -112,36 +197,62 @@ class App extends Component {
                     ? <CharacterFilter loadCharacters={this.loadNextSetCharacters} />
                     :  null
                 }
-
+                {   locationFilter 
+                    ? <LocationFilter loadLocations={this.loadNextSetLocations} />
+                    :  null
+                }
+                {   episodeFilter 
+                    ? <EpisodeFilter loadEpisodes={this.loadNextSetEpisodes} />
+                    :  null
+                }
                 {   isLocationAvailable
-                    ? <LocationList 
-                        locations={this.state.locations} 
-                        pageInfo={this.state.pageInfo}  
-                        addCharacterGroup={this.loadLocationCharacterGroup} 
+                    ? <React.Fragment>
+                        <LocationPagination 
+                            pageInfo={this.state.pageInfo} 
+                            loadLocations={this.loadNextSetLocations} 
                         />
+                        <LocationList 
+                            locations={this.state.locations} 
+                            pageInfo={this.state.pageInfo}  
+                            addCharacterGroup={this.loadLocationCharacterGroup} 
+                        />
+                    </React.Fragment>
                     : null
                 }
-                {   isCharacterAvailable
-                    ? <Pagination 
-                        pageInfo={this.state.pageInfo} 
-                        loadCharacters={this.loadNextSetCharacters}
-                        browseCharacterResults={characterFilter}
-                        addCharacterGroup={this.loadLocationCharacterGroup}
+                {   isEpisodeAvailable
+                    ? <React.Fragment>
+                        <EpisodePagination 
+                            pageInfo={this.state.pageInfo} 
+                            loadEpisodes={this.loadNextSetEpisodes} 
                         />
+                        <EpisodeList 
+                            locations={this.state.episodes} 
+                            pageInfo={this.state.pageInfo}  
+                            addCharacterGroup={this.loadLocationCharacterGroup} 
+                        />
+                    </React.Fragment>
                     : null
                 }
                 {   isCharacterAvailable 
-                    ? <CharacterList 
-                        characters = {this.state.characters} 
-                        pageInfo={this.state.pageInfo} 
-                        />
+                    ?<React.Fragment>
+                        <CharacterPagination 
+                            pageInfo={this.state.pageInfo} 
+                            loadCharacters={this.loadNextSetCharacters}
+                            browseCharacterResults={characterFilter}
+                            addCharacterGroup={this.loadLocationCharacterGroup}
+                            />
+                         <CharacterList 
+                            characters = {this.state.characters} 
+                            pageInfo={this.state.pageInfo} 
+                            />
+                    </React.Fragment>
                     : <NoCharacters />
                 }
             </div>
         )
     }
 
-    parseNextPage = (data) => {
+    parsePageUrl = (data) => {
         return (data != "")
                     ? getNextPage(data)
                     : 0;

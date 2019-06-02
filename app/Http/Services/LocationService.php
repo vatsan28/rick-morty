@@ -12,8 +12,8 @@ class LocationService
         $getLocationDetails = new Promise(
             function() use (&$getLocationDetails, $requestParams) {
                 $client = new Client();
-                list($name, $page) = $this->getRequestParams($requestParams);
-                $url = "https://rickandmortyapi.com/api/location/?page={$page}&name={$name}";
+                list($name, $page, $type, $dimension) = $this->getRequestParams($requestParams);
+                $url = "https://rickandmortyapi.com/api/location/?page={$page}&name={$name}&type={$type}&dimension={$dimension}";
                 $response = $client->get($url);
                 $data = json_decode($response->getBody());
                 $getLocationDetails->resolve($data);
@@ -23,7 +23,7 @@ class LocationService
         return $getLocationDetails;
     }
 
-    public function getCharacterById($id, $requestParams) {
+    public function getLocationById($id, $requestParams) {
         $page = (int) $requestParams->page;
         print_r($page, $id);
         
@@ -42,7 +42,9 @@ class LocationService
     private function getRequestParams($requestParams) {
         $name = (string) $requestParams->name;
         $page = (int) $requestParams->page;
-        return array($name, $page);
+        $type = (string) $requestParams->type;
+        $dimension = (string) $requestParams->dimension;
+        return array($name, $page, $type, $dimension);
     }
 }
 

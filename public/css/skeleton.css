@@ -277,6 +277,10 @@ float: left;
   cursor: pointer;
 }
 
+.locFilter {
+  width: 100%;
+}
+
 .locCard:hover {
   background: #d0c7c1;
   color: #32738a;

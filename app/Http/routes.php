@@ -16,4 +16,6 @@ $router->get('/', 'Controller@index');
 $router->get('/character/', 'CharacterController@getCharacters');
 $router->get('/character/{id}', 'CharacterController@getCharacterById');
 $router->get('/location/', 'LocationController@getLocations');
-$router->get('/location/{id}', 'CharacterController@getCharacterById');
+$router->get('/location/{id}', 'LocationController@getLocationById');
+$router->get('/episode/', 'EpisodeController@getEpisodes');
+$router->get('/episode/{id}', 'EpisodeController@getEpisodeById');
