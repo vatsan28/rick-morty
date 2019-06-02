@@ -199,11 +199,12 @@
   cursor: pointer;
   color: #0FA0CE;
 }
-.card:hover {
+.card:hover, .locCard:hover {
   /* transform: scale(0.9, 0.9); */
   box-shadow: 5px 5px 30px 15px rgba(0,0,0,0.25), 
     -5px -5px 30px 15px rgba(0,0,0,0.22);
-  background: rgb(122, 226, 245);
+  color: #b7b7b7;
+  background: #170d07;
 }
 
 .cList {
@@ -231,6 +232,7 @@
   word-wrap: break-word;
   background: #555;
   opacity: 0.9;
+  font-family: inherit;
 }
 
 .cDetailKey {
@@ -244,6 +246,51 @@ float: left;
 .cDetailVal {
   float: right;
   }
+
+.scrolling-wrapper-flexbox {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  height: 200px;
+  margin-bottom: 5%;
+  margin-top: 5%;
+  width: 100%;
+  padding-top: 2%;
+  padding-bottom: 2%;
+  -webkit-overflow-scrolling: touch;
+  background: #d7eff9;
+  }
+
+.locCard {
+  color: white;
+  flex: 0 0 auto;
+  margin-right: 1%;
+  width: 250px;
+  height: 95%;
+  background: black;
+  border-radius: 5px 5px 5px 5px;
+  box-shadow:5px 5px 30px 7px rgba(156, 154, 154, 0.25), -9px -7px 14px 20px rgba(189, 166, 166, 0.22);
+  font-family: 'Roboto', sans-serif;
+  transition: 0.4s;
+  background: #32738a;
+  color: #d0c7c1;
+  cursor: pointer;
+}
+
+.locCard:hover {
+  background: #d0c7c1;
+  color: #32738a;
+}
+
+.locLimit {
+  font-size: 2vw;
+  width:100%;
+  word-wrap: break-word;
+  background: #555;
+  color: #d0c7c1;
+  opacity: 0.9;
+  font-family: inherit;
+}
 /* Base Styles
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 /* NOTE

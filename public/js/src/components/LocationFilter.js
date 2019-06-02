@@ -17,8 +17,7 @@ class CharacterFilter extends Component {
                     response.json().then((responseJson) => {
                     console.log("Ok we are doing a good job here", responseJson);
                     const characters = fetchResults(responseJson);
-                    var resultInformation = fetchInfo(responseJson);
-                    resultInformation["filterName"] = characterName;
+                    const resultInformation = fetchInfo(responseJson);
                     this.props.loadCharacters(characters, resultInformation, "character");
                 })
             });
@@ -32,7 +31,7 @@ class CharacterFilter extends Component {
                 });
             });
         } else {
-            alert("Please use any one filter. Work in progress to give you more power!");
+            alert("Please use any one filter. Work in progress to clean this up!");
             e.currentTarget.reset();
         }
     }
