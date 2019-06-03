@@ -3,20 +3,17 @@ var _ = require('lodash');
 
 class Episode extends Component {
     addCharactersToState = (characters) => {
-        const nextSetOfResidents = _.slice(this.props.episodeDetails.residents, 20);
-        const currSetOfResidents = _.slice(this.props.episodeDetails.residents, 0, 20);
+        const nextSetOfResidents = _.slice(this.props.episodeDetails.characters, 20);
+        const currSetOfResidents = _.slice(this.props.episodeDetails.characters, 0, 20);
         this.props.addCharacterGroup(characters, nextSetOfResidents, [], currSetOfResidents);
     }
 
     fetchCharacterDetail = (result) => {
         return result.json().then((responseJson) => {
-            const character = responseJson;
-            console.log("In this awesome place");
-            return character;
+            return responseJson;
         });
     }
     handleError=(e)=>{
-        console.log(e);
         alert("We have an internal error. Please try again.");
     }
     
@@ -30,9 +27,7 @@ class Episode extends Component {
         
         Promise.all(requests)
             .then((res) =>{
-                console.log(res);
                 this.addCharactersToState(res);
-                console.log("Done yaar");
             });
     }
     render() {
@@ -47,6 +42,8 @@ class Episode extends Component {
                         <span>AIRED AT:</span> <span>{air_date}</span>
                         <br />
                         <span>CREATED AT:</span> <span>{created.substr(0,10)}</span>
+                        <br />
+                        <span>No.Of Characters</span> <span>{characters.length}</span>
                     </p>
                 </div>
             </div>

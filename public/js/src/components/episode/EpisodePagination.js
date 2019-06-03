@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { fetchResults, fetchInfo, buildUrl } from "../../helpers/Api";
+import { makeAPICall } from "../../helpers/Api";
 
 var _ = require('lodash');
 
@@ -12,18 +12,21 @@ class EpisodePagination extends Component {
     currentPage = this.nextPage == "" ? 1 :  this.nextPage - 1;
 
     handleClick = (page) => {
-        const url = (this.filterName === "" && this.code === "")
-                    ? API_URL+`/${this.resource}/?page=${page}`
-                    : buildUrl(API_URL+`/${this.resource}/`, {page, name: this.filterName, code: this.code})
-        fetch(url, {method: 'get'}).then((response)=>{
-            response.json().then((responseJson) => {
-                const episodes = fetchResults(responseJson);
-                var resultInformation = fetchInfo(responseJson);
-                resultInformation["filterName"] = this.filterName;
-                resultInformation["code"] = this.code;
-                this.props.loadEpisodes(episodes, resultInformation, this.resource);
-            })
-        });
+        var url = "/episode/";
+        var queryParams = {};
+        const filterName = this.filterName;
+        const code = this.code;
+
+        queryParams = {name: filterName, code, page};
+        
+        makeAPICall(url, queryParams, 'get')
+        .then(result => {
+            var {resourceResults, resultInformation} = result;
+            resultInformation["filterName"] = this.filterName;
+            resultInformation["code"] = this.code;
+            
+            this.props.loadEpisodes(resourceResults, resultInformation, this.resource);
+        })
     }
     
     render() {

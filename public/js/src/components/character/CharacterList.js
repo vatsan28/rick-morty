@@ -2,9 +2,7 @@ import React from "react";
 import Character from "./Character";
 
 class CharacterList extends React.Component {
-    // componentDidMount = () => {
-    //     console.log("We got character!!!",  this.props.characters);
-    // }
+    
     getCharacterGroup=(characters)=> {
         var rows = [], size = 3;
         while(characters.length > 0) {

@@ -3,8 +3,8 @@ import Episode from "./Episode";
 
 class EpisodeList extends React.Component {
     render() {
-        const episodes = this.props.locations;
-        console.log(episodes);
+        const episodes = this.props.episodes;
+        
         return(
             <div className="scrolling-wrapper-flexbox">
                 { 

@@ -23,7 +23,12 @@ class App extends Component {
         characters: [],
         locations: [],
         episodes: [],
-        pageInfo: {}
+        pageInfo: {
+        }
+    }
+
+    componentDidMount = () => {
+        document.getElementById("q1").click();
     }
 
     prepareCharacterPageInfo = (pageInfo, resource) => {
@@ -44,11 +49,10 @@ class App extends Component {
     }
 
     prepareNonCharacterPageInfo = (pageInfo, resource) => {
-        console.log(resource);
         const nextPage = this.parsePageUrl(pageInfo["next"]);
         const prevPage = this.parsePageUrl(pageInfo["prev"]);
         var res;
-        if (resource === "location") {
+        if (resource === "locations") {
             res = {
                 characters: {},
                 locations: {
@@ -62,7 +66,7 @@ class App extends Component {
                 episodes: {},
                 currentApiResource: resource
             }
-        } else if (resource === "episode") {
+        } else if (resource === "episodes") {
             res = {
                 characters: {},
                 locations: {},
@@ -76,7 +80,7 @@ class App extends Component {
                 currentApiResource: resource
             }
         }
-        console.log(res);
+        
         return (res);
     }
 
@@ -84,7 +88,7 @@ class App extends Component {
     loadState = (state) => {
         var {characters, locations, episodes, pageInfo} = state;
         const resource = state.pageInfo.currentApiResource;
-        pageInfo = (resource == "character") 
+        pageInfo = (resource == "characters") 
                     ? this.prepareCharacterPageInfo(pageInfo["characters"], resource)
                     : this.prepareNonCharacterPageInfo(pageInfo["nonCharacter"], resource) ;
         
@@ -177,61 +181,113 @@ class App extends Component {
         });
     }
 
+    handleError = (errCode, resource) => {
+        switch(resource) {
+            case "locations":
+                this.setState({
+                    "locations" :[]
+                });
+                break;
+            case "characters":
+                this.setState({
+                    "characters" :[]
+                });
+                break;
+            case "episodes":
+                this.setState({
+                    "episodes" :[]
+                });
+                break;
+        }
+    }
+
+    handleReset = (resource) => {
+        const map = {"characters": "q1", "locations": "q2", "episodes": "q3"};
+        document.getElementById(map[resource]).click();
+    }
+
     render () {
         const isCharacterAvailable = this.state.characters.length >= 1;
         const isLocationAvailable = this.state.locations.length >= 1;
         const isEpisodeAvailable = this.state.episodes.length >= 1;
         
-        const characterFilter = this.state.pageInfo.currentApiResource === "character";
-        const locationFilter = this.state.pageInfo.currentApiResource === "location";
-        const episodeFilter = this.state.pageInfo.currentApiResource === "episode";
-        console.log(this.state);
+        const characterFilter = this.state.pageInfo.currentApiResource === "characters";
+        const locationFilter = this.state.pageInfo.currentApiResource === "locations";
+        const episodeFilter = this.state.pageInfo.currentApiResource === "episodes";
+        
         return (
             <div>
                 <Header />
                 <QuestionMenu 
-                    pageInfo={this.state.pageInfo} 
+                    pageInfo={this.state.pageInfo}
                     loadState={this.loadState}
+                    handleError={this.handleError}
                 />
                 {   characterFilter 
-                    ? <CharacterFilter loadCharacters={this.loadNextSetCharacters} />
+                    ? <CharacterFilter 
+                        loadCharacters={this.loadNextSetCharacters}
+                        handleError={this.handleError}
+                        handleReset={this.handleReset}
+                    />
                     :  null
                 }
                 {   locationFilter 
-                    ? <LocationFilter loadLocations={this.loadNextSetLocations} />
+                    ? <LocationFilter 
+                        loadLocations={this.loadNextSetLocations}
+                        handleError={this.handleError}
+                        handleReset={this.handleReset}
+                        />
                     :  null
                 }
                 {   episodeFilter 
-                    ? <EpisodeFilter loadEpisodes={this.loadNextSetEpisodes} />
+                    ? <EpisodeFilter 
+                        loadEpisodes={this.loadNextSetEpisodes}
+                        handleError={this.handleError}
+                        handleReset={this.handleReset}
+                        />
                     :  null
                 }
                 {   isLocationAvailable
                     ? <React.Fragment>
                         <LocationPagination 
                             pageInfo={this.state.pageInfo} 
-                            loadLocations={this.loadNextSetLocations} 
+                            loadLocations={this.loadNextSetLocations}
+                            handleError={this.handleError}
                         />
                         <LocationList 
                             locations={this.state.locations} 
                             pageInfo={this.state.pageInfo}  
-                            addCharacterGroup={this.loadLocationCharacterGroup} 
+                            addCharacterGroup={this.loadLocationCharacterGroup}
+                            handleError={this.handleError}
                         />
                     </React.Fragment>
                     : null
+                }
+                {
+                    (!isLocationAvailable && locationFilter) 
+                        ? <NoCharacters resource={this.state.pageInfo.currentApiResource}/>
+                        : null
                 }
                 {   isEpisodeAvailable
                     ? <React.Fragment>
                         <EpisodePagination 
                             pageInfo={this.state.pageInfo} 
-                            loadEpisodes={this.loadNextSetEpisodes} 
+                            loadEpisodes={this.loadNextSetEpisodes}
+                            handleError={this.handleError}
                         />
                         <EpisodeList 
-                            locations={this.state.episodes} 
+                            episodes={this.state.episodes} 
                             pageInfo={this.state.pageInfo}  
-                            addCharacterGroup={this.loadLocationCharacterGroup} 
+                            addCharacterGroup={this.loadLocationCharacterGroup}
+                            handleError={this.handleError}
                         />
                     </React.Fragment>
                     : null
+                }
+                {
+                    (!isEpisodeAvailable && episodeFilter) 
+                        ? <NoCharacters resource={this.state.pageInfo.currentApiResource}/>
+                        : null
                 }
                 {   isCharacterAvailable 
                     ?<React.Fragment>
@@ -240,13 +296,20 @@ class App extends Component {
                             loadCharacters={this.loadNextSetCharacters}
                             browseCharacterResults={characterFilter}
                             addCharacterGroup={this.loadLocationCharacterGroup}
+                            handleError={this.handleError}
                             />
                          <CharacterList 
                             characters = {this.state.characters} 
-                            pageInfo={this.state.pageInfo} 
+                            pageInfo={this.state.pageInfo}
+                            handleError={this.handleError} 
                             />
                     </React.Fragment>
-                    : <NoCharacters />
+                    : null
+                }
+                {
+                 (!isCharacterAvailable && (characterFilter || locationFilter))
+                    ?   <NoCharacters resource={"characters"}/>
+                    : null
                 }
             </div>
         )

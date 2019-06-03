@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { fetchResults, fetchInfo, buildUrl } from "../../helpers/Api";
+import { makeAPICall } from "../../helpers/Api";
 
 class EpisodeFilter extends Component {
     episodeIdRef = React.createRef();
@@ -12,30 +12,37 @@ class EpisodeFilter extends Component {
         const episodeId = this.episodeIdRef.current.value;
         const name = this.episodeNameRef.current.value;
         const code = this.episodeCodeRef.current.value;
-        var epiUrl, url;
+        var epiUrl = "/episode/";
+        var queryParams;
 
         if (episodeId === "" && (name != "" || code != "")) {
-            epiUrl = API_URL+"/episode/";
-            url = buildUrl(epiUrl, {page: 1, name, code });
+            queryParams = {page: 1, name, code };
         } else if (name === "" && code === "" && episodeId != "") {
-            epiUrl = API_URL+"/episode/"+episodeId;
-            url = buildUrl(epiUrl, {page: 1});
+            epiUrl += episodeId;
+            queryParams = {page: 1};
         } else {
             alert("Please use just one filter. Work in progress to clean this up!");
             e.currentTarget.reset();
             return;
         }
         
-        fetch(url,{method: 'get'}).then((response) => {
-            response.json().then((responseJson) => {
-                const episodes = fetchResults(responseJson);
-                var resultInformation = fetchInfo(responseJson);
+        makeAPICall(epiUrl, queryParams, 'get')
+            .then(result => {
+                var {resourceResults, resultInformation} = result;
                 resultInformation["filterName"] = name;
                 resultInformation["code"] = code;
-                
-                this.props.loadEpisodes(episodes, resultInformation, "episode");
+
+                this.props.loadEpisodes(resourceResults, resultInformation, "episodes");
+            })
+            .catch(error => {
+                const resp = error==404? "no data" : "Error with the API";
+                console.log(resp);
+                this.props.handleError(error, "episodes");
             });
-        });
+    }
+
+    reset = e => {
+        this.props.handleReset("episodes");
     }
 
     render () {
@@ -48,6 +55,7 @@ class EpisodeFilter extends Component {
                 <input className="filterInput" name="episodeName" ref={ this.episodeNameRef } type="text" placeholder="Enter episode name" />
                 
                 <button className="filterSubmit" type="submit">Search</button>
+                <button className="filterSubmit" onClick={this.reset} type="reset" >Reset</button>
             </form>
         </div>
         )

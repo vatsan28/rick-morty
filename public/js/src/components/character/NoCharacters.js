@@ -1,9 +1,9 @@
 import React from "react";
 
-const NoCharacters = () => {
+const NoCharacters = (props) => {
     return <div className="twelve columns">
         <h3>
-            No characters found yet.
+            No { props.resource } found.
         </h3>
     </div>
 }

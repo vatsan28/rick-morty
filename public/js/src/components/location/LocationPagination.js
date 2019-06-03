@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { fetchResults, fetchInfo, buildUrl } from "../../helpers/Api";
+import { makeAPICall } from "../../helpers/Api";
 
 var _ = require('lodash');
 
@@ -8,22 +8,30 @@ class LocationPagination extends Component {
     nextPage = this.props.pageInfo.locations.nextPage;
     prevPage = this.props.pageInfo.locations.prevPage;
     filterName = this.props.pageInfo.locations.filterName;
-    type = this.props.pageInfo.locations.type;
-    dimension = this.props.pageInfo.locations.dimension;
-    currentPage = this.nextPage == "" ? 1 :  this.nextPage - 1;
-
+    filterType = this.props.pageInfo.locations.type;
+    filterDimension = this.props.pageInfo.locations.dimension;
+    currentPage = this.prevPage + 1;
+    
     handleClick = (page) => {
-        const url = (this.filterName === "" && this.type === "" && this.dimension === "")
-                    ? API_URL+`/${this.resource}/?page=${page}`
-                    : buildUrl(API_URL+`/${this.resource}/`, {page, name: filterName, type, dimension})
-                    
-        fetch(url, {method: 'get'}).then((response)=>{
-            response.json().then((responseJson) => {
-                const locations = fetchResults(responseJson);
-                var resultInformation = fetchInfo(responseJson);
-                resultInformation["filterName"] = this.filterName;
-                this.props.loadLocations(locations, resultInformation, this.resource);
-            })
+        var url = `/location/`;
+        var queryParams = {};
+        const name = this.props.pageInfo.locations.filterName;
+        const type = this.props.pageInfo.locations.filterType;
+        const dimension = this.props.pageInfo.locations.filterDimension;
+        
+        queryParams = { page, name, type, dimension};
+        
+        makeAPICall(url, queryParams, 'get')
+        .then(result => {
+            var {resourceResults, resultInformation} = result;
+            resultInformation["filterName"] = name; 
+            resultInformation["filterType"] = type;
+            resultInformation["filterDimension"] = dimension;
+            
+            this.props.loadLocations(resourceResults, resultInformation, this.resource);
+        })
+        .catch(error => {
+            this.props.handleError(error, this.resource);
         });
     }
     
@@ -32,6 +40,8 @@ class LocationPagination extends Component {
         this.nextPage = this.props.pageInfo.locations.nextPage;
         this.prevPage = this.props.pageInfo.locations.prevPage;
         this.filterName = this.props.pageInfo.locations.filterName;
+        this.type = this.props.pageInfo.locations.type;
+        this.dimension = this.props.pageInfo.locations.dimension;
         this.currentPage = this.prevPage + 1;
 
         return (

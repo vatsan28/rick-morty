@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { fetchResults, fetchInfo } from "../../helpers/Api";
 var _ = require('lodash');
 
 class Location extends Component {
@@ -11,13 +10,10 @@ class Location extends Component {
 
     fetchCharacterDetail = (result) => {
         return result.json().then((responseJson) => {
-            const character = responseJson;
-            console.log("In this awesome place");
-            return character;
+            return responseJson;
         });
     }
     handleError=(e)=>{
-        console.log(e);
         alert("We have an internal error. Please try again.");
     }
     
@@ -31,9 +27,7 @@ class Location extends Component {
         
         Promise.all(requests)
             .then((res) =>{
-                console.log(res);
                 this.addCharactersToState(res);
-                console.log("Done yaar");
             });
     }
     render() {
@@ -48,6 +42,8 @@ class Location extends Component {
                         <span>DIMENSION:</span> <span> {dimension} </span>  
                         <br />
                         <span>CREATED AT:</span> <span>{created.substr(0,10)}</span>
+                        <br />
+                        <span>No.Of Characters</span> <span>{residents.length}</span>
                     </p>
                 </div>
             </div>

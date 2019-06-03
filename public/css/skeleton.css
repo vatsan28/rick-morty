@@ -114,19 +114,28 @@
 
 .header {
   text-align: center;
-  background: #6FD6FF;
+  background: #32738a;
+  color: #b7b7b7;
 }
 
 .menu {
-  color: #bfb7b7;
-  background: black;
+  color: #32738a;
+  background: #3a3535;
   margin-bottom: 10px;
 }
 
 .me {
   border-right-style: solid;
-  border-right-color: #0FA0CE;
+  border-right-color: #32738a;
   text-align: center;
+}
+
+.me:hover{
+  color: black;
+  background: #32738a;
+}
+.me a {
+  text-decoration: none;
 }
 
 .card {
@@ -250,7 +259,7 @@ float: left;
 .scrolling-wrapper-flexbox {
   display: flex;
   flex-wrap: nowrap;
-  overflow-x: auto;
+  overflow-x: scroll;
   height: 200px;
   margin-bottom: 5%;
   margin-top: 5%;

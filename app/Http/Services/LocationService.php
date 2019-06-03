@@ -2,21 +2,30 @@
 
 namespace App\Http\Services;
 
-use GuzzleHttp\Client;
+use \App\Http\APIClient;
 use GuzzleHttp\Promise\Promise;
 
 
 class LocationService
 {
+    private $apiClient;
+
+    public function __construct() {
+        $this->apiClient = new APIClient("location");
+    }
+
     public function getLocations($requestParams) {
         $getLocationDetails = new Promise(
             function() use (&$getLocationDetails, $requestParams) {
-                $client = new Client();
-                list($name, $page, $type, $dimension) = $this->getRequestParams($requestParams);
-                $url = "https://rickandmortyapi.com/api/location/?page={$page}&name={$name}&type={$type}&dimension={$dimension}";
-                $response = $client->get($url);
-                $data = json_decode($response->getBody());
-                $getLocationDetails->resolve($data);
+                $queryParams = (object) [];
+                $queryParams->params = ["page", "name", "type", "dimension"];
+                $queryParams->page = $requestParams->page;
+                $queryParams->name = $requestParams->name;
+                $queryParams->type = $requestParams->type;
+                $queryParams->dimension = $requestParams->dimension;
+                
+                $response = $this->apiClient->getData($queryParams);
+                $this->apiClient->parseResponse($response, $getLocationDetails);
             }
         );
         
@@ -25,27 +34,19 @@ class LocationService
 
     public function getLocationById($id, $requestParams) {
         $page = (int) $requestParams->page;
-        print_r($page, $id);
         
         $getLocationByIdDetail = new Promise(
             function() use (&$getLocationByIdDetail, $page, $id) {
-                $client = new Client();
-                $response = $client->get("https://rickandmortyapi.com/api/location/{$id}/?page={$page}");
-                $data = json_decode($response->getBody());
-                $getLocationByIdDetail->resolve($data);
+                $requestParams = (object) [];
+                $requestParams->params = ["page"];
+                $requestParams->id = $id;
+                $requestParams->page = $page;
+                
+                $response = $this->apiClient->getData($requestParams);
+                $this->apiClient->parseResponse($response, $getLocationByIdDetail);
             }
         );
         
         return $getLocationByIdDetail;
     }
-
-    private function getRequestParams($requestParams) {
-        $name = (string) $requestParams->name;
-        $page = (int) $requestParams->page;
-        $type = (string) $requestParams->type;
-        $dimension = (string) $requestParams->dimension;
-        return array($name, $page, $type, $dimension);
-    }
 }
-
-

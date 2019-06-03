@@ -2,21 +2,29 @@
 
 namespace App\Http\Services;
 
-use GuzzleHttp\Client;
+use \App\Http\APIClient;
 use GuzzleHttp\Promise\Promise;
 
 
 class EpisodeService
 {
+    private $apiClient;
+
+    public function __construct() {
+        $this->apiClient = new APIClient("episode");
+    }
+
     public function getEpisodes($requestParams) {
         $getEpisodeDetails = new Promise(
             function() use (&$getEpisodeDetails, $requestParams) {
-                $client = new Client();
-                list($name, $page, $code) = $this->getRequestParams($requestParams);
-                $url = "https://rickandmortyapi.com/api/episode/?page={$page}&name={$name}&episode={$code}";
-                $response = $client->get($url);
-                $data = json_decode($response->getBody());
-                $getEpisodeDetails->resolve($data);
+                $queryParams = (object) [];
+                $queryParams->params = ["name", "episode", "page"];
+                $queryParams->name = $requestParams->name;
+                $queryParams->episode = $requestParams->code;
+                $queryParams->page = $requestParams->page;
+
+                $response = $this->apiClient->getData($queryParams);
+                $this->apiClient->parseResponse($response, $getEpisodeDetails);
             }
         );
         
@@ -25,26 +33,19 @@ class EpisodeService
 
     public function getEpisodeById($id, $requestParams) {
         $page = (int) $requestParams->page;
-        print_r($page, $id);
         
         $getEpisodeByIdDetail = new Promise(
             function() use (&$getEpisodeByIdDetail, $page, $id) {
-                $client = new Client();
-                $response = $client->get("https://rickandmortyapi.com/api/episode/{$id}/?page={$page}");
-                $data = json_decode($response->getBody());
-                $getEpisodeByIdDetail->resolve($data);
+                $requestParams = (object) [];
+                $requestParams->params = ["page"];
+                $requestParams->id = $id;
+                $requestParams->page = $page;
+                
+                $response = $this->apiClient->getData($requestParams);
+                $this->apiClient->parseResponse($response, $getEpisodeByIdDetail);
             }
         );
         
         return $getEpisodeByIdDetail;
     }
-
-    private function getRequestParams($requestParams) {
-        $name = (string) $requestParams->name;
-        $code = (string) $requestParams->code;
-        $page = (int) $requestParams->page;
-        return array($name, $page, $code);
-    }
 }
-
-

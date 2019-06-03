@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { fetchResults, fetchInfo } from "../../helpers/Api";
+import { makeAPICall } from "../../helpers/Api";
 
 var _ = require('lodash');
 
@@ -39,8 +39,12 @@ class CharacterPagination extends Component {
         });
     }
 
+    handleError = (error) => {
+        console.log("We have some problem in character fetch from pagination. Will handle soon", error);
+        return ;
+    }
+
     fetchSetOfCharacters = (residents) => {
-        console.log(this.nextClick);
         const nextResidents = this.nextClick ? _.take(residents,20) : _.takeRight(residents, 20);
         const requests = nextResidents.map((url) => {
             return fetch(url, {method: "get"}).then(this.fetchCharacterDetail).catch(this.handleError);
@@ -48,23 +52,26 @@ class CharacterPagination extends Component {
         
         Promise.all(requests)
             .then((res) =>{
-                console.log(res);
                 this.addCharactersToState(res);
-                console.log("Done yaar 2");
             });
     }
 
     fetchNextPageCharacters = (page) => {
-        const url = (this.filterName === "")
-                    ? API_URL+`/${this.resource}/?page=${page}`
-                    : API_URL+`/${this.resource}/?page=${page}&name=${this.filterName}`
-        fetch(url, {method: 'get'}).then((response)=>{
-            response.json().then((responseJson) => {
-                const characters = fetchResults(responseJson);
-                var resultInformation = fetchInfo(responseJson);
-                resultInformation["filterName"] = this.filterName;
-                this.props.loadCharacters(characters, resultInformation, this.resource);
-            })
+        var url = `/character/`;
+        var queryParams = {};
+        const name = this.filterName;
+
+        queryParams = {page, name};
+
+        makeAPICall(url, queryParams, 'get')
+        .then(result => {
+            var {resourceResults, resultInformation} = result;
+            resultInformation["filterName"] = name; 
+            
+            this.props.loadCharacters(resourceResults, resultInformation, this.resource);
+        })
+        .catch(error => {
+            this.props.handleError(error, this.resource);
         });
     }
     

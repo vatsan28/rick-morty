@@ -7,21 +7,42 @@ use App\Http\Services\EpisodeService;
 use Illuminate\Http\Request;
 
 class EpisodeController extends BaseController {
+    private $EpisodeService;
+    public function __construct(EpisodeService $episodeService) {
+        $this->episodeService = $episodeService;
+    }
+
     public function getEpisodes(Request $request) {
         $requestParams = $this->fetchRequestParams($request);
-        $episodeService = new EpisodeService;
-        $result = $episodeService->getEpisodes($requestParams)->wait();
+        $result = $this->episodeService->getEpisodes($requestParams);
 
-        return response()->json($result);
+        try {
+            $data = $result->wait();
+            return response()->json($data);
+        } catch (\GuzzleHttp\Promise\RejectionException $e){
+            if ($e->getReason() == 404) {
+                return response()->json("No data found.", 404);
+            }else{
+                return response()->json($e->getReason());
+            };
+        }
     }
 
     public function getEpisodeById($id, Request $request) {
         $requestParams = $this->fetchRequestParams($request);
-        $episodeService = new EpisodeService;
-        $episode = $episodeService->getEpisodeById($id, $requestParams)->wait();
-        $result = $this->prepareResponse($episode);
+        $result = $this->episodeService->getEpisodeById($id, $requestParams);
         
-        return response()->json($result);
+        try {
+            $episodes = $result->wait();
+            $data = $this->prepareResponse($episodes);
+            return response()->json($data);
+        } catch (\GuzzleHttp\Promise\RejectionException $e){
+            if ($e->getReason() == 404) {
+                return response()->json("No data found.", 404);
+            }else{
+                return response()->json($e->getReason());
+            };
+        }
     }
 
     private function fetchRequestParams(Request $request) {

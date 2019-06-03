@@ -2,48 +2,48 @@
 
 namespace App\Http\Services;
 
-use GuzzleHttp\Client;
+use \App\Http\APIClient;
 use GuzzleHttp\Promise\Promise;
 
 
 class CharacterService
 {
+    private $apiClient;
+
+    public function __construct() {
+        $this->apiClient = new APIClient("character");
+    }
+
     public function getCharacters($requestParams) {
         $getCharacterDetails = new Promise(
             function() use (&$getCharacterDetails, $requestParams) {
-                $client = new Client();
-                list($name, $page) = $this->getRequestParams($requestParams);
-                $url = "https://rickandmortyapi.com/api/character/?page={$page}&name={$name}";
-                $response = $client->get($url);
-                $data = json_decode($response->getBody());
-                $getCharacterDetails->resolve($data);
+                $queryParams = (object) [];
+                $queryParams->params = ["page", "name"];
+                $queryParams->page = $requestParams->page;
+                $queryParams->name = $requestParams->name;
+                
+                $response = $this->apiClient->getData($queryParams);
+                $this->apiClient->parseResponse($response, $getCharacterDetails);
             }
         );
-        
         return $getCharacterDetails;
     }
 
     public function getCharacterById($id, $requestParams) {
         $page = (int) $requestParams->page;
-        print_r($page, $id);
         
         $getCharacterByIdDetail = new Promise(
             function() use (&$getCharacterByIdDetail, $page, $id) {
-                $client = new Client();
-                $response = $client->get("https://rickandmortyapi.com/api/character/{$id}/?page={$page}");
-                $data = json_decode($response->getBody());
-                $getCharacterByIdDetail->resolve($data);
+                $requestParams = (object) [];
+                $requestParams->params = ["page"];
+                $requestParams->id = $id;
+                $requestParams->page = $page;
+                
+                $response = $this->apiClient->getData($requestParams);
+                $this->apiClient->parseResponse($response, $getCharacterByIdDetail);
             }
         );
         
         return $getCharacterByIdDetail;
     }
-
-    private function getRequestParams($requestParams) {
-        $name = (string) $requestParams->name;
-        $page = (int) $requestParams->page;
-        return array($name, $page);
-    }
 }
-
-

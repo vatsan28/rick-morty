@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { fetchResults, fetchInfo, buildUrl } from "../../helpers/Api";
+import { makeAPICall } from "../../helpers/Api";
 
 class LocationFilter extends Component {
     locationNameRef = React.createRef();
@@ -14,29 +14,37 @@ class LocationFilter extends Component {
         const locationId = this.locationIdRef.current.value;
         const locationType = this.locationTypeRef.current.value;
         const locationDimension = this.locationDimensionRef.current.value;
-        var locUrl, url;
+        var locUrl = "/location/";
+        var queryParams = {};
 
         if (locationId === "" && (locationName != "" || locationType != "" || locationDimension != "")) {
-            locUrl = API_URL+"/location/";
-            url = buildUrl(locUrl, {page: 1, name: locationName,dimension: locationDimension, type: locationType });
+            queryParams = {page: 1, name: locationName,dimension: locationDimension, type: locationType };
         } else if (locationId != "" && (locationName == "" && locationType == "" && locationDimension == "")) {
-            locUrl = API_URL+"/location/"+locationId;
-            url = buildUrl(url, {page: 1});
+            locUrl += locationId;
+            queryParams = {page: 1};
         } else {
-            alert("Please use atleast one filter. Work in progress!!!");
+            alert("Please use one of the filters. Work in progress!!!");
             e.currentTarget.reset();
         }
         
-        fetch(url,{method: 'get'}).then((response) => {
-            response.json().then((responseJson) => {
-                const locations = fetchResults(responseJson);
-                var resultInformation = fetchInfo(responseJson);
+        makeAPICall(locUrl, queryParams, 'get')
+            .then(result => {
+                var {resourceResults, resultInformation} = result;
                 resultInformation["filterName"] = locationName;
                 resultInformation["filterType"] = locationType;
                 resultInformation["filterDimension"] = locationDimension;
-                this.props.loadLocations(locations, resultInformation, "location");
+                this.props.loadLocations(resourceResults, resultInformation, "locations");
+            })
+            .catch(error => {
+                console.log(error);
+                const resp = error==404? "no data" : "Error with the API";
+                console.log(resp);
+                this.props.handleError(error, "locations");
             });
-        });
+    }
+    
+    reset = e => {
+        this.props.handleReset("locations");
     }
 
     render () {
@@ -50,6 +58,7 @@ class LocationFilter extends Component {
                 <input className="filterInput" name="locationDimension" ref={ this.locationDimensionRef } type="text" placeholder="Enter location dimension" />
 
                 <button className="filterSubmit" type="submit">Search</button>
+                <button className="filterSubmit" onClick={this.reset} type="reset" >Reset</button>
             </form>
         </div>
         )
