@@ -73,3 +73,11 @@ curl -s http://php-osx.liip.ch/install.sh | bash -s 7.1
 
  - Each view has 20 cards in a page. Use the pagination to switch between results.
     
+    
+    
+ # Future Scope 
+ - Additional filter features based on existing character cards on a page like sorting characters by name and other criteria.
+ - Unit tests for both back-end and front-end stack. 
+ - An API wrapper for the react components when the scale gets bigger.
+ - Separating the frontend and backend into separate apps when the scale grows should be fairly simple because of react and lumen. React can be separated out into its own app and the lumen server can run on its own.
+ - CSS & UX can be refined.
